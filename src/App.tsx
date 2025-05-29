@@ -1,6 +1,7 @@
 import { sdk } from "@farcaster/frame-sdk";
 import { useEffect } from "react";
-import { useAccount, useConnect, useSignMessage } from "wagmi";
+import CreateToken from "./CreateToken";
+import Navbar from "./Navbar";
 
 function App() {
   useEffect(() => {
@@ -8,59 +9,14 @@ function App() {
   }, []);
 
   return (
-    <>
-      <div>Token Deployer</div>
-      <ConnectMenu />
-    </>
-  );
-}
-
-function ConnectMenu() {
-  const { isConnected, address } = useAccount();
-  const { connect, connectors } = useConnect();
-
-  if (isConnected) {
-    return (
-      <>
-        <div>Connected account:</div>
-        <div>{address}</div>
-        <SignButton />
-      </>
-    );
-  }
-
-  return (
-    <button type="button" onClick={() => connect({ connector: connectors[0] })}>
-      Connect
-    </button>
-  );
-}
-
-function SignButton() {
-  const { signMessage, isPending, data, error } = useSignMessage();
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => signMessage({ message: "Welcome" })}
-        disabled={isPending}
-      >
-        {isPending ? "Signing..." : "Sign message"}
-      </button>
-      {data && (
-        <>
-          <div>Signature</div>
-          <div>{data}</div>
-        </>
-      )}
-      {error && (
-        <>
-          <div>Error</div>
-          <div>{error.message}</div>
-        </>
-      )}
-    </>
+    <div className="min-h-screen bg-gray-900">
+      <Navbar />
+      <div className="flex items-center justify-center mt-8">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+          <CreateToken />
+        </div>
+      </div>
+    </div>
   );
 }
 
