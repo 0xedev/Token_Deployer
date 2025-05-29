@@ -3,7 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TokenCreator</title>
+    <title>Forge</title>
+
+    <meta
+      property="og:title"
+      content="Forge - Create and manage your own tokens"
+    />
+    <meta
+      property="og:description"
+      content="Create and manage your own tokens with Forge."
+    />
+    <meta property="og:image" content="https://forge-chi.vercel.app/logo.png" />
+    <meta property="og:url" content="https://forge-chi.vercel.app" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta
+      name="fc:frame"
+      content='{ 
+        "version": "next",
+        "imageUrl": "https://forge-chi.vercel.app/logo.png",
+        "button": {
+          "title": "Create your token",
+          "action": {
+            "type": "launch_frame",
+            "url": "https://forge-chi.vercel.app",
+            "name": "Forge",
+            "splashImageUrl": "https://forge-chi.vercel.app/logo.png",
+            "splashBackgroundColor": "#244052"
+          }
+        }
+      }'
+    />
+
+    <meta
+      name="fc:frame-default-for-spa"
+      style="display: none"
+      content='{
+        "version": "next",
+        "imageUrl": "https://forge-chi.vercel.app/logo.png",
+        "button": {
+          "title": "Create your token",
+          "action": {
+            "type": "launch_frame",
+            "url": "https://forge-chi.vercel.app",
+            "name": "Forge",
+            "splashImageUrl": "https://forge-chi.vercel.app/logo.png",
+            "splashBackgroundColor": "#244052"
+          }
+        }
+      }'
+    />
   </head>
   <body>
     <div id="root"></div>

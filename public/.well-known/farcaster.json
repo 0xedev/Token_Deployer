@@ -1,1 +1,38 @@
-{}
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEwNDI1MjIsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhjRjlCNjczZTM3NmM2ZGQwMDliNDNlQzc2MTM5YUVhYmRBMDJCNjRlIn0",
+    "payload": "eyJkb21haW4iOiJmb3JnZS1jaGkudmVyY2VsLmFwcCJ9",
+    "signature": "MHgxZjZkYzQ4NjE5ZGYyZmU4OTgxMjZiMjFhNDdkY2QyYjhiMzQ0YWI1MjVkMDJjZDAzODc3YWNjOGRmY2UzNjk4NWUxNTE4MzUyMjU4ZmI4YmE0YTk4OGEzNTFhMGFkYWE4YWM3ZGY4YjJmYTM0ZDIyZmM4YjBhMTY1MjUzNmNiMzFj"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Forge",
+    "iconUrl": "https://forge-chi.vercel.app/icon.jpg",
+    "homeUrl": "https://forge-chi.vercel.app",
+    "imageUrl": "https://forge-chi.vercel.app/logo.png",
+    "buttonTitle": "Create token",
+    "splashImageUrl": "https://forge-chi.vercel.app/logo.png",
+    "splashBackgroundColor": "#244052",
+    "webhookUrl": "https://forge-chi.vercel.app/api/webhook",
+    "subtitle": "Create and manage your own tokens",
+    "description": "Create and manage your own tokens with Forge",
+    "primaryCategory": "finance",
+    "tags": ["token", "forge", "airdrop", "erc20", "farcaster"],
+    "tagline": "Forge - Create and manage your own tokens",
+    "ogTitle": "Forge - Create and manage your own tokens",
+    "ogDescription": "Create and manage your own tokens with Forge",
+    "ogImage": "https://forge-chi.vercel.app/logo.png",
+    "noindex": false,
+    "permissions": ["cast:read"],
+    "notifications": {
+      "enabled": true,
+      "categories": [
+        {
+          "id": "welcome",
+          "name": "Welcome Messages"
+        }
+      ]
+    },
+    "author": "Raize Team"
+  }
+}
