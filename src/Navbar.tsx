@@ -27,14 +27,62 @@ const Navbar = () => {
             {isConnected ? (
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <div className="px-3 py-2 bg-slate-800/50 border border-slate-600 rounded-lg text-sm text-slate-300 font-mono backdrop-blur-sm">
+                <div className="px-3 py-2 bg-slate-800/50 border border-slate-600 rounded-lg text-sm text-slate-300 font-mono backdrop-blur-sm truncate max-w-[150px] sm:max-w-xs">
                   {`${address?.slice(0, 6)}...${address?.slice(-4)}`}
                 </div>
               </div>
             ) : (
               <button
                 type="button"
-                onClick={() => connect({ connector: connectors[0] })}
+                onClick={() => {
+                  const farcasterConnector = connectors.find(
+                    (c) => c.id === "farcasterFrame" // More specific ID based on the connector name
+                  );
+                  const injectedConnector = connectors.find(
+                    (c) => c.id === "injected"
+                  );
+
+                  // Prioritize Farcaster connector if it exists and is ready
+                  // Using 'in' operator for a more robust type check for 'ready'
+                  if (
+                    farcasterConnector &&
+                    "ready" in farcasterConnector &&
+                    farcasterConnector.ready
+                  ) {
+                    connect({ connector: farcasterConnector });
+                  }
+                  // Else, prioritize Injected connector if it exists and is ready
+                  else if (
+                    injectedConnector &&
+                    "ready" in injectedConnector &&
+                    injectedConnector.ready
+                  ) {
+                    connect({ connector: injectedConnector });
+                  }
+                  // Fallback: If Injected connector exists (even if not strictly 'ready'), try it
+                  else if (injectedConnector) {
+                    console.warn(
+                      "Injected connector not 'ready' or 'ready' property not found, but attempting to connect."
+                    );
+                    connect({ connector: injectedConnector });
+                  }
+                  // Fallback: If Farcaster connector exists (even if not strictly 'ready'), try it
+                  else if (farcasterConnector) {
+                    console.warn(
+                      "Farcaster connector not 'ready' or 'ready' property not found, but attempting to connect."
+                    );
+                    connect({ connector: farcasterConnector });
+                  }
+                  // Last resort: if any connectors exist, try the first one.
+                  else if (connectors.length > 0) {
+                    console.warn(
+                      "Preferred connectors not available. Attempting to connect with the first available connector."
+                    );
+                    connect({ connector: connectors[0] });
+                  } else {
+                    console.warn("No suitable or available connectors found.");
+                  }
+                }}
                 className="relative group overflow-hidden bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-medium px-4 py-2 rounded-lg shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 transform hover:scale-105"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
