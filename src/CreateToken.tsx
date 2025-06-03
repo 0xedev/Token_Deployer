@@ -1,21 +1,51 @@
 import { useState, useEffect } from "react";
 import { useWriteContract } from "wagmi";
-import { parseEther } from "viem";
+import { formatEther, decodeEventLog, getEventSelector, AbiEvent } from "viem";
 import { TOKEN_FACTORY_ABI } from "./abis/TokenFactory";
+import { readContract } from "viem/actions";
+import { usePublicClient } from "wagmi"; // Add this import
+import sdk from "@farcaster/frame-sdk";
+import { toast } from "react-toastify";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faShareFromSquare } from "@fortawesome/free-solid-svg-icons";
 
 const TOKEN_FACTORY_ADDRESS = import.meta.env.VITE_TOKEN_FACTORY_ADDRESS;
 
 const CreateToken = () => {
   const { writeContract, isPending, error, data } = useWriteContract();
+  const publicClient = usePublicClient();
   const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [initialSupply, setInitialSupply] = useState("");
   const [imageURI, setImageURI] = useState("");
   const [status, setStatus] = useState("");
+  const [tokenAddress, setTokenAddress] = useState("");
+  const [creationFee, setCreationFee] = useState<bigint | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    async function fetchCreationFee() {
+      try {
+        const fee = await readContract(publicClient as any, {
+          address: TOKEN_FACTORY_ADDRESS,
+          abi: TOKEN_FACTORY_ABI,
+          functionName: "CREATION_FEE",
+        });
+        setCreationFee(fee as bigint);
+      } catch (err) {
+        setStatus("Failed to fetch creation fee");
+      }
+    }
+    if (publicClient) fetchCreationFee();
+  }, [publicClient]);
 
   const createToken = () => {
     if (!name || !symbol || !initialSupply) {
       setStatus("Please fill in all required fields");
+      return;
+    }
+    if (!creationFee) {
+      setStatus("Fetching creation fee...");
       return;
     }
     setStatus("Creating token...");
@@ -23,16 +53,65 @@ const CreateToken = () => {
       address: TOKEN_FACTORY_ADDRESS,
       abi: TOKEN_FACTORY_ABI,
       functionName: "createToken",
-      args: [name, symbol, BigInt(initialSupply) * BigInt(10 ** 18), imageURI],
-      value: parseEther("0.006"),
+      args: [name, symbol, BigInt(initialSupply), imageURI],
+      value: creationFee,
     });
   };
 
   useEffect(() => {
-    if (data) {
-      setStatus(`Token created! Tx: ${data}`);
+    if (data && publicClient) {
+      setStatus("Token created! Fetching address...");
+      (publicClient as any)
+        .waitForTransactionReceipt({ hash: data })
+        .then((receipt: { logs: any[] }) => {
+          // Find the TokenCreated event ABI from your ABI array
+          const tokenCreatedAbi = TOKEN_FACTORY_ABI.find(
+            (item) => item.type === "event" && item.name === "TokenCreated"
+          ) as AbiEvent | undefined;
+          if (!tokenCreatedAbi) {
+            setStatus("TokenCreated event ABI not found.");
+            return;
+          }
+          // Get the event selector (topic hash)
+          const eventSelector = getEventSelector(tokenCreatedAbi);
+
+          const tokenCreatedEvent = receipt.logs.find(
+            (log: any) =>
+              log.address.toLowerCase() ===
+                TOKEN_FACTORY_ADDRESS.toLowerCase() &&
+              log.topics[0] === eventSelector
+          );
+
+          if (tokenCreatedEvent) {
+            const decodedLog = decodeEventLog({
+              abi: TOKEN_FACTORY_ABI,
+              data: tokenCreatedEvent.data,
+              topics: tokenCreatedEvent.topics,
+            });
+            let address = "";
+            if (Array.isArray(decodedLog.args)) {
+              address = decodedLog.args[0];
+            } else if (decodedLog.args && typeof decodedLog.args === "object") {
+              address = (decodedLog.args as any).tokenAddress;
+            }
+            if (address) {
+              setTokenAddress(address);
+              setStatus(`Token created!`);
+            } else {
+              setTokenAddress("");
+              setStatus("Unable to retrieve token address.");
+            }
+          } else {
+            setTokenAddress("");
+            setStatus("Unable to retrieve token address.");
+          }
+        })
+        .catch(() => {
+          setTokenAddress("");
+          setStatus("Unable to retrieve token address.");
+        });
     }
-  }, [data]);
+  }, [data, publicClient]);
 
   useEffect(() => {
     if (error) {
@@ -220,7 +299,9 @@ const CreateToken = () => {
                   </svg>
                   <span className="text-sm">Create Token</span>
                   <span className="text-cyan-200 text-xs">
-                    (Fee: 0.006 ETH)
+                    {creationFee !== null
+                      ? `(Fee: ${formatEther(creationFee)} ETH)`
+                      : "(Fetching fee...)"}
                   </span>
                 </>
               )}
@@ -291,6 +372,66 @@ const CreateToken = () => {
               <p className="text-xs font-medium break-all">{status}</p>
             </div>
           </div>
+          {tokenAddress && (
+            <div className="mt-2 flex items-center justify-between bg-slate-800/20 p-2 rounded-md">
+              <span className="text-xs text-slate-400 break-all">
+                {tokenAddress}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(tokenAddress);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 1500);
+                    } catch (e) {
+                      setCopied(false);
+                    }
+                  }}
+                  className="p-1 rounded hover:bg-slate-700/30 transition-colors duration-200"
+                >
+                  {copied ? (
+                    <span className="text-xs text-green-400 px-2">Copied!</span>
+                  ) : (
+                    <svg
+                      className="w-4 h-4 text-slate-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M9 5h-2a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 01-2-2 2 2 0 012 2z"></path>
+                    </svg>
+                  )}
+                </button>
+                <button
+                  title="Share on Farcaster"
+                  onClick={async () => {
+                    const shareText = `I just created my token "${name}"! Create yours here!`;
+                    const shareUrl = `https://forge-chi.vercel.app/`;
+                    try {
+                      await sdk.actions.composeCast({
+                        text: shareText,
+                        embeds: [shareUrl],
+                      });
+                    } catch (error) {
+                      console.error("Failed to share :", error);
+                      if (typeof toast !== "undefined" && toast.error) {
+                        toast.error(
+                          "Could not open Farcaster composer to share."
+                        );
+                      }
+                    }
+                  }}
+                  className="p-1 rounded hover:bg-blue-600/20 transition-colors duration-200"
+                >
+                  <FontAwesomeIcon
+                    icon={faShareFromSquare}
+                    className="h-5 w-5 text-blue-500 hover:text-blue-700 transition-colors"
+                  />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
