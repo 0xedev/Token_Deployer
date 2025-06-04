@@ -24,7 +24,7 @@ function App() {
           {isFromRaize && (
             <div className="mt-6">
               <a
-                href="https://your-raize-app-url.com"
+                href="https://raize-taupe.vercel.app/"
                 className="inline-block w-full text-center bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-md hover:shadow-emerald-500/50"
               >
                 Back to Raize
