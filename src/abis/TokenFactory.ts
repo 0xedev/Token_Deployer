@@ -124,6 +124,12 @@ export const TOKEN_FACTORY_ABI = [
       },
       { name: "name", type: "string", indexed: false, internalType: "string" },
       {
+        name: "symbol",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
         name: "initialSupply",
         type: "uint256",
         indexed: false,
