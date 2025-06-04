@@ -50,7 +50,7 @@ contract TokenCreator is ERC20, Ownable {
     const constructorArgs = ethers.AbiCoder.defaultAbiCoder()
       .encode(
         ["string", "string", "uint256", "address", "string"],
-        [name, event.args.symbol, initialSupply, creator, imageURI]
+        [name, symbol, initialSupply, creator, imageURI]
       )
       .replace("0x", "");
 
