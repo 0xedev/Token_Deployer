@@ -177,7 +177,7 @@ const CreateToken = () => {
               onChange={(e) => setSymbol(e.target.value.toUpperCase())}
               className="w-full px-3 py-2 text-sm bg-slate-800/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 focus:outline-none transition-all duration-200 backdrop-blur-sm uppercase"
               placeholder="TKN"
-              maxLength={5}
+              maxLength={15}
             />
             <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-focus-within:opacity-100 transition-opacity duration-200 pointer-events-none"></div>
           </div>
